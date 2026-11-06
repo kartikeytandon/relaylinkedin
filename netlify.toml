@@ -1,10 +1,12 @@
 [build]
-  command = "mkdir -p dist && cp waitlist/index.html dist/index.html"
+  # Works whether Netlify base directory is repo root or /waitlist
+  command = "mkdir -p dist && (cp waitlist/index.html dist/index.html 2>/dev/null || cp index.html dist/index.html) && test -f dist/index.html"
   publish = "dist"
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
+  directory = "netlify/functions"
 
 [functions."signup"]
   included_files = ["netlify/email-templates/**"]
@@ -24,9 +26,17 @@
   status = 200
   force = true
 
+# SPA-safe: never show Netlify 404 for the homepage
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Block Netlify public HUD ("Powered by Netlify") — allows inline app JS only
+    Content-Security-Policy = "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
