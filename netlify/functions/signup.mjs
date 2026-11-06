@@ -11,9 +11,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function loadTemplate(name) {
   const candidates = [
+    join(__dirname, "../email-templates", name),
+    join(process.cwd(), "netlify/email-templates", name),
     join(process.cwd(), "waitlist", name),
-    join(__dirname, "../../waitlist", name),
-    join(__dirname, name),
   ];
   for (const path of candidates) {
     try {
@@ -125,7 +125,6 @@ export async function handler(event) {
     text,
   });
 
-  // Notify yourself of new signups
   if (process.env.RESEND_API_KEY) {
     await sendResend({
       to: REPLY_TO,

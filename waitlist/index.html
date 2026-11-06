@@ -537,6 +537,18 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* Hide Netlify branding badge if injected */
+    #netlify-badge,
+    .netlify-badge,
+    a[href*="netlify.com"][id*="badge" i],
+    a[href*="netlify.com"][class*="badge" i],
+    body > a[href*="netlify.com"][style*="position: fixed"],
+    body > a[href*="www.netlify.com"][style*="fixed"] {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
   </style>
 </head>
 <body>

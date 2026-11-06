@@ -7,8 +7,8 @@ const SITE_URL = process.env.RELAY_SITE_URL || "https://relay.devkartikey.com";
 
 function loadTemplate(name) {
   const candidates = [
-    join(process.cwd(), "waitlist", name),
-    join(__dirname, "../../waitlist", name),
+    join(__dirname, "../email-templates", name),
+    join(process.cwd(), "netlify/email-templates", name),
   ];
   for (const path of candidates) {
     try {

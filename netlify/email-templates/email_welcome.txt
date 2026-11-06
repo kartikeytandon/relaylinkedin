@@ -1,0 +1,27 @@
+RELAY — You're on the waitlist
+
+Thanks for joining{{#email}} as {{email}}{{/email}}.
+
+We're building a Chrome extension that finds hiring posts, connects, checks acceptances, and follows up — no terminal, no tech setup.
+
+YOUR LAUNCH PERK IS LOCKED
+When RELAY launches, waitlist members choose one:
+
+  • 1 month free — full access trial when we ship
+  • 90% off — deep launch discount on paid plans
+
+This offer is tied to {{email}}. We'll email you again at launch with your invite.
+
+What RELAY does
+  01  Find hiring posts
+  02  Send connects under safe daily caps
+  03  Check who accepted
+  04  Message & follow up when you're ready
+
+{{site_url}}
+
+— RELAY
+Questions? sayhello@devkartikey.com
+relay.devkartikey.com
+
+You received this because you joined the waitlist. No spam — only launch updates.

@@ -6,12 +6,15 @@
 [functions]
   node_bundler = "esbuild"
 
-[functions."waitlist"]
-  included_files = ["waitlist/email_welcome.html", "waitlist/email_welcome.txt"]
+[functions."signup"]
+  included_files = ["netlify/email-templates/**"]
+
+[functions."email-preview"]
+  included_files = ["netlify/email-templates/**"]
 
 [[redirects]]
   from = "/api/waitlist"
-  to = "/.netlify/functions/waitlist"
+  to = "/.netlify/functions/signup"
   status = 200
   force = true
 
