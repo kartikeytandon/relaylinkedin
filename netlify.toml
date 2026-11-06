@@ -8,12 +8,6 @@
   node_bundler = "esbuild"
   directory = "netlify/functions"
 
-[functions."signup"]
-  included_files = ["netlify/email-templates/**"]
-
-[functions."email-preview"]
-  included_files = ["netlify/email-templates/**"]
-
 [[redirects]]
   from = "/api/waitlist"
   to = "/.netlify/functions/signup"

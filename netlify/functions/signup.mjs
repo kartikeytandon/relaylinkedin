@@ -1,29 +1,10 @@
-import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { getStore } from "@netlify/blobs";
+import { WELCOME_HTML, WELCOME_TEXT } from "./templates.mjs";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = process.env.RELAY_SITE_URL || "https://relay.devkartikey.com";
-const FROM = process.env.RELAY_SMTP_FROM || "RELAY <sayhello@devkartikey.com>";
-const REPLY_TO = process.env.RELAY_SMTP_REPLY_TO || "sayhello@devkartikey.com";
+const FROM = process.env.RELAY_SMTP_FROM || "RELAY <sayhello@relay.devkartikey.com>";
+const REPLY_TO = process.env.RELAY_SMTP_REPLY_TO || "sayhello@relay.devkartikey.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function loadTemplate(name) {
-  const candidates = [
-    join(__dirname, "../email-templates", name),
-    join(process.cwd(), "netlify/email-templates", name),
-    join(process.cwd(), "waitlist", name),
-  ];
-  for (const path of candidates) {
-    try {
-      return readFileSync(path, "utf8");
-    } catch {
-      /* try next */
-    }
-  }
-  throw new Error(`Missing template ${name}`);
-}
 
 function render(raw, email) {
   let out = raw.replace(/\{\{#email\}\}(.*?)\{\{\/email\}\}/gs, email ? "$1" : "");
@@ -39,27 +20,33 @@ async function sendResend({ to, subject, html, text }) {
     return { sent: false, reason: "no_api_key" };
   }
 
+  const payload = {
+    from: FROM,
+    to: [to],
+    subject,
+    html,
+    text,
+  };
+  if (!FROM.includes("resend.dev")) {
+    payload.reply_to = REPLY_TO;
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: FROM,
-      to: [to],
-      reply_to: REPLY_TO,
-      subject,
-      html,
-      text,
-    }),
+    body: JSON.stringify(payload),
   });
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    console.error("[email] resend failed", data);
-    return { sent: false, reason: data.message || "resend_error" };
+    const reason = data.message || data.error || JSON.stringify(data) || "resend_error";
+    console.error("[email] resend failed", res.status, data);
+    return { sent: false, reason };
   }
+  console.log("[email] sent", { to, id: data.id, from: FROM });
   return { sent: true, id: data.id };
 }
 
@@ -115,24 +102,29 @@ export async function handler(event) {
     user_agent: event.headers["user-agent"] || "",
   });
 
-  const html = render(loadTemplate("email_welcome.html"), email);
-  const text = render(loadTemplate("email_welcome.txt"), email);
+  const html = render(WELCOME_HTML, email);
+  const text = render(WELCOME_TEXT, email);
 
-  await sendResend({
+  const welcome = await sendResend({
     to: email,
     subject: "You're on the RELAY waitlist — launch perk locked",
     html,
     text,
   });
 
-  if (process.env.RESEND_API_KEY) {
+  if (process.env.RESEND_API_KEY && welcome.sent) {
     await sendResend({
-      to: REPLY_TO,
+      to: process.env.RELAY_NOTIFY_TO || REPLY_TO,
       subject: `[RELAY waitlist] ${email}`,
       html: `<p>New waitlist signup: <strong>${email}</strong></p>`,
       text: `New waitlist signup: ${email}`,
-    }).catch(() => {});
+    }).catch((e) => console.error("[email] notify failed", e));
   }
 
-  return json(200, { ok: true, duplicate: false });
+  return json(200, {
+    ok: true,
+    duplicate: false,
+    email_sent: welcome.sent,
+    email_error: welcome.sent ? undefined : welcome.reason,
+  });
 }

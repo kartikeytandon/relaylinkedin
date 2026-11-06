@@ -731,9 +731,15 @@
         btn.classList.add("success");
         btn.textContent = data.duplicate ? "Already in" : "You're in";
         hint.classList.add("ok");
-        hint.textContent = data.duplicate
-          ? "That email is already on the list — your launch offer is saved."
-          : "You're in. Launch perk locked: 1 month free or 90% off.";
+        if (data.duplicate) {
+          hint.textContent = "That email is already on the list — your launch offer is saved.";
+        } else if (data.email_sent === false) {
+          hint.classList.remove("ok");
+          hint.classList.add("err");
+          hint.textContent = "You're on the list, but email failed: " + (data.email_error || "check Resend domain / API key");
+        } else {
+          hint.textContent = "You're in. Check your inbox (and spam) for the launch perk email.";
+        }
         const rect = btn.getBoundingClientRect();
         burstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
         if (!data.duplicate) email.value = "";

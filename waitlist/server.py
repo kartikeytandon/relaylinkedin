@@ -24,7 +24,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
 HOST = os.environ.get("RELAY_HOST", "127.0.0.1")
 SITE_URL = os.environ.get("RELAY_SITE_URL", "https://relay.devkartikey.com")
-FROM_EMAIL = os.environ.get("RELAY_SMTP_FROM", "RELAY <sayhello@devkartikey.com>")
+FROM_EMAIL = os.environ.get("RELAY_SMTP_FROM", "RELAY <sayhello@relay.devkartikey.com>")
 
 
 def ensure_csv():
@@ -65,7 +65,7 @@ def send_welcome_email(to_email: str) -> None:
     user = os.environ.get("RELAY_SMTP_USER", "")
     password = os.environ.get("RELAY_SMTP_PASS", "")
     from_addr = os.environ.get("RELAY_SMTP_FROM", FROM_EMAIL)
-    reply_to = os.environ.get("RELAY_SMTP_REPLY_TO", "sayhello@devkartikey.com")
+    reply_to = os.environ.get("RELAY_SMTP_REPLY_TO", "sayhello@relay.devkartikey.com")
     use_ssl = os.environ.get("RELAY_SMTP_SSL", "").lower() in {"1", "true", "yes"}
 
     html, text = build_welcome_email(to_email)
