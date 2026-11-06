@@ -1,6 +1,5 @@
 [build]
-  # Works whether Netlify base directory is repo root or /waitlist
-  command = "mkdir -p dist && (cp waitlist/index.html dist/index.html 2>/dev/null || cp index.html dist/index.html) && test -f dist/index.html"
+  command = "mkdir -p dist && (cp waitlist/index.html dist/index.html 2>/dev/null || cp index.html dist/index.html) && cp waitlist/admin.html dist/admin.html && test -f dist/index.html"
   publish = "dist"
   functions = "netlify/functions"
 
@@ -15,12 +14,28 @@
   force = true
 
 [[redirects]]
+  from = "/api/visit"
+  to = "/.netlify/functions/visit"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/email-preview"
   to = "/.netlify/functions/email-preview"
   status = 200
   force = true
 
-# SPA-safe: never show Netlify 404 for the homepage
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
 [[redirects]]
   from = "/"
   to = "/index.html"
@@ -32,5 +47,4 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Block Netlify public HUD ("Powered by Netlify") — allows inline app JS only
     Content-Security-Policy = "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>RELAY — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0b1220;
+      --blue: #1d4ed8;
+      --muted: #64748b;
+      --line: rgba(11, 18, 32, 0.08);
+      --paper: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(700px 400px at 10% 0%, rgba(59, 130, 246, 0.18), transparent 55%),
+        linear-gradient(180deg, #eff6ff 0%, var(--paper) 40%);
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .brand {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-size: 1.35rem;
+    }
+    .brand span { color: var(--blue); }
+    .ghost {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .ghost:hover { border-color: #93c5fd; }
+
+    .gate, .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+    }
+    .gate {
+      max-width: 380px;
+      margin: 12vh auto 0;
+      padding: 28px;
+    }
+    .gate h1 {
+      margin: 0 0 8px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.6rem;
+    }
+    .gate p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .gate input {
+      width: 100%;
+      border: 1.5px solid var(--ink);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      margin-bottom: 12px;
+    }
+    .gate button, .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      font-weight: 700;
+      background: var(--blue);
+      color: #fff;
+      cursor: pointer;
+    }
+    .err { color: #e11d48; font-size: 13px; min-height: 1.2em; margin-top: 10px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+    }
+    .stat b {
+      display: block;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.8rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat span { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+    .panel { padding: 18px; }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 120px;
+      margin-bottom: 8px;
+    }
+    .bar {
+      flex: 1;
+      background: #dbeafe;
+      border-radius: 6px 6px 2px 2px;
+      min-height: 4px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .bar:hover { background: var(--blue); }
+    .bar span {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    td.mono { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+    .empty { color: var(--muted); font-size: 14px; padding: 12px 0; }
+    .scroll { max-height: 420px; overflow: auto; }
+
+    @media (max-width: 800px) {
+      .stats, .grid { grid-template-columns: 1fr; }
+      header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="gate" class="gate">
+      <h1>RELAY admin</h1>
+      <p>Enter the admin password to view interests and visits.</p>
+      <form id="login">
+        <input id="password" type="password" placeholder="Admin password" autocomplete="current-password" required />
+        <button type="submit">Open dashboard</button>
+      </form>
+      <p class="err" id="login-err"></p>
+    </div>
+
+    <div id="app" hidden>
+      <header>
+        <div class="brand">RELAY <span>admin</span></div>
+        <div style="display:flex;gap:8px;">
+          <button class="ghost" type="button" id="refresh">Refresh</button>
+          <button class="ghost" type="button" id="logout">Log out</button>
+        </div>
+      </header>
+
+      <div class="stats">
+        <div class="stat"><b id="s-signups">—</b><span>Waitlist interests</span></div>
+        <div class="stat"><b id="s-visits">—</b><span>Total visits</span></div>
+        <div class="stat"><b id="s-today">—</b><span>Visits today</span></div>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>Interests</h2>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Email</th><th>Joined</th></tr></thead>
+              <tbody id="signup-rows"></tbody>
+            </table>
+            <p class="empty" id="signup-empty" hidden>No signups yet.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Visits · last 14 days</h2>
+          <div class="bars" id="bars" aria-hidden="true"></div>
+          <h2 style="margin-top:28px">Recent visits</h2>
+          <div class="scroll" style="max-height:260px">
+            <table>
+              <thead><tr><th>When</th><th>Path</th><th>From</th></tr></thead>
+              <tbody id="visit-rows"></tbody>
+            </table>
+            <p class="empty" id="visit-empty" hidden>No visits tracked yet.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const KEY = "relay_admin_key";
+    const gate = document.getElementById("gate");
+    const app = document.getElementById("app");
+    const loginErr = document.getElementById("login-err");
+
+    function token() { return sessionStorage.getItem(KEY) || ""; }
+
+    function showApp() {
+      gate.hidden = true;
+      app.hidden = false;
+      load();
+    }
+
+    function showGate() {
+      sessionStorage.removeItem(KEY);
+      app.hidden = true;
+      gate.hidden = false;
+    }
+
+    async function load() {
+      loginErr.textContent = "";
+      const res = await fetch("/api/admin", {
+        headers: { Authorization: "Bearer " + token() },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        showGate();
+        loginErr.textContent = "Wrong password.";
+        return;
+      }
+      if (!res.ok || !data.ok) {
+        loginErr.textContent = data.message || data.error || "Could not load data.";
+        if (!app.hidden) alert(loginErr.textContent);
+        return;
+      }
+
+      document.getElementById("s-signups").textContent = data.signup_count ?? 0;
+      document.getElementById("s-visits").textContent = data.visits?.total ?? 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const todayCount = (data.visits?.last_14_days || []).find((d) => d.day === today)?.count || 0;
+      document.getElementById("s-today").textContent = todayCount;
+
+      const signupRows = document.getElementById("signup-rows");
+      const signupEmpty = document.getElementById("signup-empty");
+      signupRows.innerHTML = "";
+      const signups = data.signups || [];
+      signupEmpty.hidden = signups.length > 0;
+      for (const s of signups) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${escapeHtml(s.email)}</td><td class="mono">${formatWhen(s.joined_at)}</td>`;
+        signupRows.appendChild(tr);
+      }
+
+      const bars = document.getElementById("bars");
+      bars.innerHTML = "";
+      const series = data.visits?.last_14_days || [];
+      const max = Math.max(1, ...series.map((d) => d.count));
+      for (const d of series) {
+        const el = document.createElement("div");
+        el.className = "bar";
+        el.style.height = Math.max(4, (d.count / max) * 100) + "%";
+        el.title = d.day + ": " + d.count;
+        el.innerHTML = `<span>${d.day.slice(5)}</span>`;
+        bars.appendChild(el);
+      }
+
+      const visitRows = document.getElementById("visit-rows");
+      const visitEmpty = document.getElementById("visit-empty");
+      visitRows.innerHTML = "";
+      const recent = data.visits?.recent || [];
+      visitEmpty.hidden = recent.length > 0;
+      for (const v of recent) {
+        const tr = document.createElement("tr");
+        const from = v.referrer ? shortUrl(v.referrer) : "—";
+        tr.innerHTML = `<td class="mono">${formatWhen(v.at)}</td><td>${escapeHtml(v.path || "/")}</td><td>${escapeHtml(from)}</td>`;
+        visitRows.appendChild(tr);
+      }
+    }
+
+    function formatWhen(iso) {
+      if (!iso) return "—";
+      try {
+        return new Date(iso).toLocaleString(undefined, {
+          month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+        });
+      } catch { return iso; }
+    }
+    function shortUrl(u) {
+      try { return new URL(u).hostname; } catch { return u.slice(0, 40); }
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    document.getElementById("login").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pw = document.getElementById("password").value;
+      sessionStorage.setItem(KEY, pw);
+      const res = await fetch("/api/admin", { headers: { Authorization: "Bearer " + pw } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        sessionStorage.removeItem(KEY);
+        loginErr.textContent = data.message || "Wrong password or storage not ready.";
+        return;
+      }
+      showApp();
+    });
+
+    document.getElementById("logout").addEventListener("click", showGate);
+    document.getElementById("refresh").addEventListener("click", load);
+
+    if (token()) showApp();
+  </script>
+</body>
+</html>

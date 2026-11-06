@@ -1,13 +1,10 @@
 import { WELCOME_HTML, WELCOME_TEXT } from "./templates.mjs";
+import { addSignup } from "./store.mjs";
 
 const SITE_URL = process.env.RELAY_SITE_URL || "https://relay.devkartikey.com";
 const FROM = process.env.RELAY_SMTP_FROM || "RELAY <sayhello@relay.devkartikey.com>";
 const REPLY_TO = process.env.RELAY_SMTP_REPLY_TO || "sayhello@relay.devkartikey.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Simple in-process dedupe for warm Lambda instances (best-effort only)
-const recent = new Map();
-const DEDUPE_MS = 1000 * 60 * 60 * 24; // 24h
 
 function render(raw, email) {
   let out = raw.replace(/\{\{#email\}\}(.*?)\{\{\/email\}\}/gs, email ? "$1" : "");
@@ -29,7 +26,6 @@ async function sendResend({ to, subject, html, text }) {
     subject,
     html,
     text,
-    // Helps Gmail treat this as a transactional confirmation, not a blast
     headers: {
       "List-Unsubscribe": `<mailto:${REPLY_TO}?subject=unsubscribe>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -70,16 +66,6 @@ function json(status, body) {
   };
 }
 
-function seenRecently(email) {
-  const now = Date.now();
-  for (const [k, t] of recent) {
-    if (now - t > DEDUPE_MS) recent.delete(k);
-  }
-  if (recent.has(email)) return true;
-  recent.set(email, now);
-  return false;
-}
-
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") {
     return {
@@ -109,7 +95,19 @@ export async function handler(event) {
     return json(400, { ok: false, error: "invalid_email" });
   }
 
-  if (seenRecently(email)) {
+  let duplicate = false;
+  try {
+    const saved = await addSignup({
+      email,
+      user_agent: event.headers["user-agent"] || "",
+    });
+    duplicate = saved.duplicate;
+  } catch (err) {
+    console.error("[store] signup save failed", err);
+    // still send welcome — don't block interest capture
+  }
+
+  if (duplicate) {
     return json(200, { ok: true, duplicate: true });
   }
 
@@ -123,8 +121,7 @@ export async function handler(event) {
     text,
   });
 
-  // Notify your real inbox (don't use the From address — it may not receive mail)
-  const notifyTo = process.env.RELAY_NOTIFY_TO || "tandonkartikey@gmail.com";
+  const notifyTo = (process.env.RELAY_NOTIFY_TO || "").trim().toLowerCase();
   if (notifyTo && notifyTo !== email) {
     await sendResend({
       to: notifyTo,

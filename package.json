@@ -2,5 +2,7 @@
   "name": "relay-waitlist",
   "private": true,
   "type": "module",
-  "dependencies": {}
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
 }

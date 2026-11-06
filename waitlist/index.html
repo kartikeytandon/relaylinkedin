@@ -624,6 +624,22 @@
   </div>
 
   <script>
+    // Site visit beacon (once per tab session)
+    try {
+      if (!sessionStorage.getItem("relay_visit")) {
+        sessionStorage.setItem("relay_visit", "1");
+        fetch("/api/visit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: location.pathname || "/",
+            referrer: document.referrer || "",
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch (_) { /* ignore */ }
+
     const steps = [
       { meta: "+12", line: "Found 12 hiring posts from today", label: "Find" },
       { meta: "6/15", line: "Sent 6 connects · under your daily cap", label: "Connect" },
