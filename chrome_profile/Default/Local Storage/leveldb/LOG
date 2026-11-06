@@ -1,0 +1,8 @@
+2026/11/05-23:11:19.850 5 Reusing MANIFEST /home/kartikey-tandon/Desktop/Old Laptop Dumps/practice_projects/linkedinscript/chrome_profile/Default/Local Storage/leveldb/MANIFEST-000001
+2026/11/05-23:11:19.851 5 Recovering log #3
+2026/11/05-23:11:19.852 5 Level-0 table #3: started
+2026/11/05-23:11:19.857 5 Level-0 table #3: 13089 bytes OK
+2026/11/05-23:11:19.859 5 Recovering log #4
+2026/11/05-23:11:19.861 5 Reusing old log /home/kartikey-tandon/Desktop/Old Laptop Dumps/practice_projects/linkedinscript/chrome_profile/Default/Local Storage/leveldb/000004.log 
+2026/11/05-23:11:19.864 5 Delete type=0 #3
+2026/11/05-23:11:19.865 5 Delete type=2 #5

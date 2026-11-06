@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RELAY — Join the waitlist</title>
+  <meta name="description" content="RELAY is a Chrome extension that finds hiring posts, connects, checks, and messages on LinkedIn for you. Join the waitlist for up to 1 month free or 90% off at launch." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0b1220;
+      --blue: #1d4ed8;
+      --blue-mid: #2563eb;
+      --blue-bright: #3b82f6;
+      --blue-soft: #93c5fd;
+      --paper: #ffffff;
+      --danger: #fb7185;
+      --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+      --mx: 70%;
+      --my: 40%;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .shell {
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(20px, 3vw, 40px);
+      padding: clamp(16px, 3vh, 32px) clamp(20px, 4vw, 48px);
+      position: relative;
+      background:
+        radial-gradient(900px 620px at var(--mx) var(--my), rgba(255,255,255,0.28), transparent 48%),
+        linear-gradient(155deg, #1d4ed8 0%, #2563eb 45%, #60a5fa 100%);
+      overflow: hidden;
+    }
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at 65% 45%, #000 20%, transparent 72%);
+      animation: gridDrift 18s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridDrift {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 40px 40px, 40px 40px; }
+    }
+
+    .copy {
+      position: relative;
+      z-index: 2;
+      flex: 0 1 420px;
+      width: min(420px, 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+    .copy::before {
+      content: "RELAY";
+      position: absolute;
+      left: -2%;
+      bottom: -4%;
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(5.5rem, 16vh, 10rem);
+      letter-spacing: -0.06em;
+      line-height: 0.8;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.14);
+      pointer-events: none;
+      user-select: none;
+      transform: rotate(-6deg);
+      animation: watermark 12s ease-in-out infinite alternate;
+    }
+    @keyframes watermark {
+      from { transform: rotate(-6deg) translateY(0); }
+      to { transform: rotate(-4deg) translateY(-8px); }
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      width: fit-content;
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      font-size: clamp(1.5rem, 3vh, 1.9rem);
+      color: #fff;
+      opacity: 0;
+      animation: in 0.7s var(--ease) 0.05s forwards;
+    }
+    .logo em {
+      font-style: normal;
+      padding: 0 6px;
+      background: rgba(255,255,255,0.16);
+      border-radius: 6px;
+      box-shadow: inset 0 -2px 0 rgba(255,255,255,0.25);
+    }
+    .logo-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: conic-gradient(from 210deg, #fff, var(--blue-soft), #fff, var(--blue-soft));
+      position: relative;
+      animation: spin 8s linear infinite;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.22);
+    }
+    .logo-mark::after {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: 5px;
+      background: var(--blue-mid);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes ping {
+      0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.35); }
+      70% { box-shadow: 0 0 0 10px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2.4rem, 5.5vh, 3.6rem);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      color: #fff;
+      opacity: 0;
+      animation: in 0.8s var(--ease) 0.15s forwards;
+    }
+    h1 .swap {
+      display: inline;
+      color: #eff6ff;
+      font-style: italic;
+      font-weight: 700;
+      text-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    }
+    h1 .swap.is-out {
+      opacity: 0;
+      filter: blur(3px);
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+    h1 .swap.is-in {
+      opacity: 1;
+      filter: blur(0);
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    .pitch {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.88);
+      max-width: 34em;
+      opacity: 0;
+      animation: in 0.8s var(--ease) 0.2s forwards;
+    }
+
+    .offer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      opacity: 0;
+      animation: in 0.8s var(--ease) 0.24s forwards;
+    }
+    .offer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      backdrop-filter: blur(8px);
+    }
+    .offer span strong {
+      font-weight: 700;
+      color: #eff6ff;
+    }
+    .offer .star {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fde68a;
+      box-shadow: 0 0 0 3px rgba(253, 230, 138, 0.25);
+      flex-shrink: 0;
+    }
+
+    .join {
+      opacity: 0;
+      animation: in 0.8s var(--ease) 0.28s forwards;
+      width: 100%;
+    }
+    .fine {
+      margin: 8px 0 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: rgba(255,255,255,0.72);
+    }
+    .form {
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .form:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.28);
+    }
+    .form.invalid {
+      outline: 2px solid var(--danger);
+      animation: shake 0.4s var(--ease);
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+    }
+    .form input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      padding: 15px 16px;
+      font: inherit;
+      font-size: 14px;
+      background: transparent;
+      color: var(--ink);
+      min-width: 0;
+    }
+    .form input::placeholder { color: #94a3b8; }
+    .form button {
+      border: 0;
+      background: var(--ink);
+      color: #fff;
+      padding: 0 18px;
+      font: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .form button:hover { background: #1e293b; }
+    .form button:disabled { opacity: 0.7; cursor: default; }
+    .form button.success { background: #0f766e; }
+    .hint {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: rgba(255,255,255,0.78);
+      min-height: 1.1em;
+    }
+    .hint.ok { color: #ecfeff; }
+    .hint.err { color: #fecdd3; }
+
+    .stage {
+      position: relative;
+      z-index: 2;
+      flex: 0 1 440px;
+      width: min(440px, 100%);
+      display: grid;
+      place-items: center;
+      overflow: visible;
+    }
+
+    .orbit {
+      position: absolute;
+      width: 120%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 1px dashed rgba(255,255,255,0.22);
+      animation: spin 28s linear infinite;
+      pointer-events: none;
+    }
+    .orbit.slow {
+      width: 95%;
+      animation-duration: 18s;
+      animation-direction: reverse;
+      border-style: solid;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .orbit span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      margin: -4px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 5px rgba(255,255,255,0.12);
+      transform: rotate(var(--a)) translateX(min(240px, 28vw)) rotate(calc(-1 * var(--a)));
+    }
+    .orbit.slow span {
+      width: 6px; height: 6px; margin: -3px;
+      background: #bfdbfe;
+      transform: rotate(var(--a)) translateX(min(180px, 22vw)) rotate(calc(-1 * var(--a)));
+    }
+
+    .panel {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 22px;
+      box-shadow:
+        0 30px 60px rgba(15, 23, 42, 0.28),
+        0 0 0 1px rgba(255,255,255,0.2) inset;
+      padding: 18px;
+      color: var(--ink);
+      transform: none;
+      transition: transform 0.45s var(--ease);
+      opacity: 0;
+      animation: in 0.9s var(--ease) 0.22s forwards;
+    }
+    .panel:hover { transform: translateY(-4px); }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(11, 18, 32, 0.1);
+    }
+    .panel-head strong {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--blue);
+      background: #dbeafe;
+      padding: 5px 9px;
+      border-radius: 999px;
+    }
+    .live i {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--blue);
+      animation: ping 1.6s ease-out infinite;
+    }
+
+    .path-wrap { height: 54px; margin-bottom: 10px; }
+    .path-wrap svg { width: 100%; height: 100%; overflow: visible; }
+    .path-line {
+      fill: none;
+      stroke: rgba(29, 78, 216, 0.25);
+      stroke-width: 2;
+      stroke-dasharray: 4 6;
+    }
+    .path-glow {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 40 220;
+      animation: dash 2.8s linear infinite;
+    }
+    @keyframes dash { to { stroke-dashoffset: -260; } }
+
+    .nodes {
+      display: flex;
+      justify-content: space-between;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+    .node {
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: color 0.3s ease, transform 0.3s var(--ease);
+    }
+    .node.on { color: var(--blue); transform: translateY(-2px); }
+
+    .cards { display: grid; gap: 8px; }
+    .card {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid transparent;
+      color: #64748b;
+      transition: all 0.35s var(--ease);
+    }
+    .card.active {
+      background: #eff6ff;
+      border-color: rgba(29, 78, 216, 0.2);
+      color: var(--ink);
+      transform: scale(1.02);
+      box-shadow: 0 10px 24px rgba(29, 78, 216, 0.12);
+    }
+    .card.done { color: #334155; }
+    .ico {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: #e2e8f0;
+      font-size: 13px;
+      transition: background 0.3s ease, transform 0.35s var(--ease);
+    }
+    .card.active .ico {
+      background: var(--blue);
+      color: #fff;
+      transform: rotate(-8deg) scale(1.08);
+    }
+    .card.done .ico { background: #bfdbfe; color: var(--blue); }
+    .card b { display: block; font-size: 13px; font-weight: 600; }
+    .card small { font-size: 11px; opacity: 0.8; }
+    .meta {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+      min-width: 2.8em;
+      text-align: right;
+    }
+
+    .cli {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #0b1220;
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .cli .g { color: #93c5fd; }
+    .cli .caret {
+      display: inline-block;
+      width: 7px;
+      height: 1em;
+      margin-left: 3px;
+      background: #93c5fd;
+      vertical-align: -2px;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .burst { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
+    .burst i {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      opacity: 0; animation: burst 0.85s var(--ease) forwards;
+    }
+    @keyframes burst {
+      0% { opacity: 1; transform: translate(0,0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.2); }
+    }
+
+    @keyframes in {
+      from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        flex-direction: column;
+        justify-content: center;
+        gap: 18px;
+        padding: 16px;
+        overflow: auto;
+      }
+      .copy {
+        flex: none;
+        width: min(420px, 100%);
+        gap: 10px;
+      }
+      .hero { gap: 12px; }
+      .copy::before { font-size: 5rem; opacity: 0.55; }
+      h1 { font-size: clamp(2.1rem, 8vw, 3rem); }
+      .stage { flex: none; width: min(420px, 100%); }
+      .orbit { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      .form { flex-direction: column; border-radius: 14px; }
+      .form button { padding: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="burst" id="burst" aria-hidden="true"></div>
+
+  <div class="shell" id="stage">
+    <section class="copy">
+      <div class="hero">
+        <div class="logo"><span class="logo-mark" aria-hidden="true"></span><em>Relay</em></div>
+        <h1>
+          Outreach that
+          <span class="swap is-in" id="verb">finds</span>
+          for you.
+        </h1>
+        <p class="pitch">
+          A Chrome extension for job seekers — find hiring posts, connect, check replies, and follow up.
+        </p>
+        <div class="offer" aria-label="Waitlist launch offer">
+          <span><i class="star" aria-hidden="true"></i> Waitlist perk: <strong>1 month Free Trial</strong></span>
+        </div>
+        <div class="join">
+          <form class="form" id="waitlist" novalidate>
+            <label for="email" style="position:absolute;left:-9999px">Email</label>
+            <input id="email" name="email" type="email" required placeholder="you@email.com" autocomplete="email" />
+            <button type="submit" id="join">Join waitlist</button>
+          </form>
+          <p class="fine">Early access · launch offer locked to your email</p>
+          <p class="hint" id="hint"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="orbit" aria-hidden="true">
+        <span style="--a:20deg"></span>
+        <span style="--a:140deg"></span>
+        <span style="--a:250deg"></span>
+      </div>
+      <div class="orbit slow" aria-hidden="true">
+        <span style="--a:70deg"></span>
+        <span style="--a:200deg"></span>
+      </div>
+
+      <div class="panel" aria-label="Product preview">
+        <div class="panel-head">
+          <strong>Today’s outreach</strong>
+          <span class="live"><i></i> preview</span>
+        </div>
+
+        <div class="path-wrap" aria-hidden="true">
+          <svg viewBox="0 0 360 54" preserveAspectRatio="none">
+            <path class="path-line" d="M8 27 C 70 27, 70 8, 120 8 S 170 46, 220 46 270 8, 320 8 352 27, 352 27" />
+            <path class="path-glow" d="M8 27 C 70 27, 70 8, 120 8 S 170 46, 220 46 270 8, 320 8 352 27, 352 27" />
+          </svg>
+        </div>
+        <div class="nodes" aria-hidden="true">
+          <span class="node" data-i="0">Find</span>
+          <span class="node" data-i="1">Connect</span>
+          <span class="node" data-i="2">Check</span>
+          <span class="node" data-i="3">Message</span>
+        </div>
+
+        <div class="cards" id="cards">
+          <div class="card" data-step="0"><div class="ico">⌕</div><div><b>Find hiring posts</b><small>last 24 hours</small></div><div class="meta">—</div></div>
+          <div class="card" data-step="1"><div class="ico">⇢</div><div><b>Send connects</b><small>safe daily cap</small></div><div class="meta">—</div></div>
+          <div class="card" data-step="2"><div class="ico">✓</div><div><b>Check acceptances</b><small>who said yes</small></div><div class="meta">—</div></div>
+          <div class="card" data-step="3"><div class="ico">✎</div><div><b>Message &amp; follow up</b><small>when you’re ready</small></div><div class="meta">—</div></div>
+        </div>
+
+        <div class="cli"><span class="g">→</span> <span id="typed"></span><span class="caret"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const steps = [
+      { meta: "+12", line: "Found 12 hiring posts from today", label: "Find" },
+      { meta: "6/15", line: "Sent 6 connects · under your daily cap", label: "Connect" },
+      { meta: "3 new", line: "3 people accepted your invite", label: "Check" },
+      { meta: "sent", line: "Messages & follow-ups ready to send", label: "Message" },
+    ];
+    const verbs = ["finds", "connects", "checks", "messages"];
+    const verbEl = document.getElementById("verb");
+    let verbI = 0;
+    setInterval(() => {
+      verbEl.classList.remove("is-in");
+      verbEl.classList.add("is-out");
+      setTimeout(() => {
+        verbI = (verbI + 1) % verbs.length;
+        verbEl.textContent = verbs[verbI];
+        verbEl.classList.remove("is-out");
+        verbEl.classList.add("is-in");
+      }, 220);
+    }, 2200);
+
+    const cards = [...document.querySelectorAll(".card")];
+    const nodes = [...document.querySelectorAll(".node")];
+    const typed = document.getElementById("typed");
+    let i = 0, typeTimer;
+
+    function typeLine(text) {
+      clearInterval(typeTimer);
+      typed.textContent = "";
+      let n = 0;
+      typeTimer = setInterval(() => {
+        typed.textContent = text.slice(0, ++n);
+        if (n >= text.length) clearInterval(typeTimer);
+      }, 14);
+    }
+
+    function paint(active) {
+      cards.forEach((el, idx) => {
+        el.classList.toggle("active", idx === active);
+        el.classList.toggle("done", idx < active);
+        el.querySelector(".meta").textContent =
+          idx < active ? steps[idx].meta : idx === active ? "run" : "—";
+      });
+      nodes.forEach((n) => n.classList.toggle("on", Number(n.dataset.i) <= active));
+      typeLine(steps[active].line);
+    }
+
+    paint(0);
+    setInterval(() => { i = (i + 1) % steps.length; paint(i); }, 2800);
+
+    const stage = document.getElementById("stage");
+    stage.addEventListener("pointermove", (e) => {
+      const r = stage.getBoundingClientRect();
+      stage.style.setProperty("--mx", ((e.clientX - r.left) / r.width) * 100 + "%");
+      stage.style.setProperty("--my", ((e.clientY - r.top) / r.height) * 100 + "%");
+    });
+
+    function burstAt(x, y) {
+      const layer = document.getElementById("burst");
+      for (let n = 0; n < 16; n++) {
+        const d = document.createElement("i");
+        const ang = (Math.PI * 2 * n) / 16;
+        const dist = 40 + Math.random() * 55;
+        d.style.left = x + "px";
+        d.style.top = y + "px";
+        d.style.background = n % 2 ? "#fff" : "#93c5fd";
+        d.style.setProperty("--tx", Math.cos(ang) * dist + "px");
+        d.style.setProperty("--ty", Math.sin(ang) * dist + "px");
+        layer.appendChild(d);
+        setTimeout(() => d.remove(), 850);
+      }
+    }
+
+    const form = document.getElementById("waitlist");
+    const email = document.getElementById("email");
+    const btn = document.getElementById("join");
+    const hint = document.getElementById("hint");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      form.classList.remove("invalid");
+      hint.className = "hint";
+      hint.textContent = "";
+      btn.classList.remove("success");
+
+      if (!email.value || !email.checkValidity()) {
+        form.classList.add("invalid");
+        email.focus();
+        hint.classList.add("err");
+        hint.textContent = "Enter a valid email.";
+        return;
+      }
+
+      btn.disabled = true;
+      const prev = btn.textContent;
+      btn.textContent = "Sending…";
+
+      try {
+        const res = await fetch("/api/waitlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.value.trim() }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || "failed");
+        btn.classList.add("success");
+        btn.textContent = data.duplicate ? "Already in" : "You're in";
+        hint.classList.add("ok");
+        hint.textContent = data.duplicate
+          ? "That email is already on the list — your launch offer is saved."
+          : "You're in. Launch perk locked: 1 month free or 90% off.";
+        const rect = btn.getBoundingClientRect();
+        burstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        if (!data.duplicate) email.value = "";
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = prev;
+        form.classList.add("invalid");
+        hint.classList.add("err");
+        hint.textContent = "Couldn’t reach the server. Refresh and try again.";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
