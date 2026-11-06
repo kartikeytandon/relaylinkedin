@@ -1,4 +1,4 @@
-import { loadState } from "./store.mjs";
+import { loadState, initStore } from "./store.mjs";
 
 function json(status, body) {
   return {
@@ -51,6 +51,7 @@ export async function handler(event) {
   }
 
   try {
+    initStore(event);
     const state = await loadState();
     const days = state.visits?.days || {};
     const last14 = Object.keys(days)

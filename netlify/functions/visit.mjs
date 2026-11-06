@@ -1,4 +1,4 @@
-import { trackVisit } from "./store.mjs";
+import { trackVisit, initStore } from "./store.mjs";
 
 function json(status, body) {
   return {
@@ -39,6 +39,7 @@ export async function handler(event) {
   }
 
   try {
+    initStore(event);
     await trackVisit({
       path,
       referrer,

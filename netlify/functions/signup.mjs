@@ -1,5 +1,5 @@
 import { WELCOME_HTML, WELCOME_TEXT } from "./templates.mjs";
-import { addSignup } from "./store.mjs";
+import { addSignup, initStore } from "./store.mjs";
 
 const SITE_URL = process.env.RELAY_SITE_URL || "https://relay.devkartikey.com";
 const FROM = process.env.RELAY_SMTP_FROM || "RELAY <sayhello@relay.devkartikey.com>";
@@ -97,6 +97,7 @@ export async function handler(event) {
 
   let duplicate = false;
   try {
+    initStore(event);
     const saved = await addSignup({
       email,
       user_agent: event.headers["user-agent"] || "",

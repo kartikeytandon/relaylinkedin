@@ -1,11 +1,18 @@
-import { getStore } from "@netlify/blobs";
+import { getStore, connectLambda } from "@netlify/blobs";
 
 const STORE_NAME = "relay-analytics";
 
 /**
- * Prefer automatic Netlify Functions context (no SITE_ID / TOKEN).
- * Manual env vars only as optional override.
+ * Must be called once per request with the Lambda `event`
+ * so Blobs gets Netlify context (no SITE_ID / TOKEN needed).
+ * Netlify injects `event.blobs` automatically on deployed functions.
  */
+export function initStore(event) {
+  if (event?.blobs) {
+    connectLambda(event);
+  }
+}
+
 export function analyticsStore() {
   const siteID = (process.env.NETLIFY_SITE_ID || process.env.SITE_ID || "").trim();
   const token = (
@@ -15,11 +22,10 @@ export function analyticsStore() {
     ""
   ).trim();
 
+  // Optional manual override; normally connectLambda(event) is enough
   if (siteID && token) {
     return getStore({ name: STORE_NAME, siteID, token });
   }
-
-  // Automatic on Netlify when @netlify/blobs is external (not esbuild-bundled)
   return getStore(STORE_NAME);
 }
 
