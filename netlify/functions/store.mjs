@@ -2,17 +2,24 @@ import { getStore } from "@netlify/blobs";
 
 const STORE_NAME = "relay-analytics";
 
-/** Netlify Blobs store — uses auto context, or siteID + token from env. */
+/**
+ * Prefer automatic Netlify Functions context (no SITE_ID / TOKEN).
+ * Manual env vars only as optional override.
+ */
 export function analyticsStore() {
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token =
-    process.env.NETLIFY_BLOBS_TOKEN ||
+  const siteID = (process.env.NETLIFY_SITE_ID || process.env.SITE_ID || "").trim();
+  const token = (
     process.env.NETLIFY_AUTH_TOKEN ||
-    process.env.NETLIFY_API_TOKEN;
+    process.env.NETLIFY_BLOBS_TOKEN ||
+    process.env.NETLIFY_API_TOKEN ||
+    ""
+  ).trim();
 
   if (siteID && token) {
     return getStore({ name: STORE_NAME, siteID, token });
   }
+
+  // Automatic on Netlify when @netlify/blobs is external (not esbuild-bundled)
   return getStore(STORE_NAME);
 }
 
@@ -42,7 +49,6 @@ export async function addSignup({ email, user_agent }) {
     joined_at: new Date().toISOString(),
     user_agent: (user_agent || "").slice(0, 200),
   });
-  // keep last 5000
   state.signups = state.signups.slice(0, 5000);
   await saveState(state);
   return { duplicate: false, state };
@@ -64,7 +70,6 @@ export async function trackVisit({ path, referrer, user_agent }) {
   });
   state.visits.recent = state.visits.recent.slice(0, 200);
 
-  // prune days older than ~90
   const keys = Object.keys(state.visits.days).sort();
   if (keys.length > 90) {
     for (const k of keys.slice(0, keys.length - 90)) delete state.visits.days[k];

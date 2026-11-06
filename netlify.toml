@@ -6,6 +6,8 @@
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
+  # Keep Blobs unbundled so Netlify injects site context (no SITE_ID/TOKEN needed)
+  external_node_modules = ["@netlify/blobs"]
 
 [[redirects]]
   from = "/api/waitlist"
