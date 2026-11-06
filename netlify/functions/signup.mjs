@@ -1,10 +1,13 @@
-import { getStore } from "@netlify/blobs";
 import { WELCOME_HTML, WELCOME_TEXT } from "./templates.mjs";
 
 const SITE_URL = process.env.RELAY_SITE_URL || "https://relay.devkartikey.com";
 const FROM = process.env.RELAY_SMTP_FROM || "RELAY <sayhello@relay.devkartikey.com>";
 const REPLY_TO = process.env.RELAY_SMTP_REPLY_TO || "sayhello@relay.devkartikey.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Simple in-process dedupe for warm Lambda instances (best-effort only)
+const recent = new Map();
+const DEDUPE_MS = 1000 * 60 * 60 * 24; // 24h
 
 function render(raw, email) {
   let out = raw.replace(/\{\{#email\}\}(.*?)\{\{\/email\}\}/gs, email ? "$1" : "");
@@ -61,6 +64,16 @@ function json(status, body) {
   };
 }
 
+function seenRecently(email) {
+  const now = Date.now();
+  for (const [k, t] of recent) {
+    if (now - t > DEDUPE_MS) recent.delete(k);
+  }
+  if (recent.has(email)) return true;
+  recent.set(email, now);
+  return false;
+}
+
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") {
     return {
@@ -90,17 +103,9 @@ export async function handler(event) {
     return json(400, { ok: false, error: "invalid_email" });
   }
 
-  const store = getStore("waitlist-signups");
-  const existing = await store.get(email, { type: "json" });
-  if (existing) {
+  if (seenRecently(email)) {
     return json(200, { ok: true, duplicate: true });
   }
-
-  await store.setJSON(email, {
-    email,
-    joined_at: new Date().toISOString(),
-    user_agent: event.headers["user-agent"] || "",
-  });
 
   const html = render(WELCOME_HTML, email);
   const text = render(WELCOME_TEXT, email);
@@ -112,14 +117,15 @@ export async function handler(event) {
     text,
   });
 
-  if (process.env.RESEND_API_KEY && welcome.sent) {
-    await sendResend({
-      to: process.env.RELAY_NOTIFY_TO || REPLY_TO,
-      subject: `[RELAY waitlist] ${email}`,
-      html: `<p>New waitlist signup: <strong>${email}</strong></p>`,
-      text: `New waitlist signup: ${email}`,
-    }).catch((e) => console.error("[email] notify failed", e));
-  }
+  // Always try to notify you (even if welcome failed — so you still capture the lead)
+  const notifyTo = process.env.RELAY_NOTIFY_TO || REPLY_TO;
+  await sendResend({
+    to: notifyTo,
+    subject: `[RELAY waitlist] ${email}${welcome.sent ? "" : " (welcome mail failed)"}`,
+    html: `<p>New waitlist signup: <strong>${email}</strong></p>
+           <p>Welcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}</p>`,
+    text: `New waitlist signup: ${email}\nWelcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}`,
+  }).catch((e) => console.error("[email] notify failed", e));
 
   return json(200, {
     ok: true,
