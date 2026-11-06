@@ -29,6 +29,12 @@ async function sendResend({ to, subject, html, text }) {
     subject,
     html,
     text,
+    // Helps Gmail treat this as a transactional confirmation, not a blast
+    headers: {
+      "List-Unsubscribe": `<mailto:${REPLY_TO}?subject=unsubscribe>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      "X-Entity-Ref-ID": `${to}-${Date.now()}`,
+    },
   };
   if (!FROM.includes("resend.dev")) {
     payload.reply_to = REPLY_TO;
@@ -112,20 +118,21 @@ export async function handler(event) {
 
   const welcome = await sendResend({
     to: email,
-    subject: "You're on the RELAY waitlist — launch perk locked",
+    subject: "You're on the RELAY waitlist",
     html,
     text,
   });
 
-  // Always try to notify you (even if welcome failed — so you still capture the lead)
-  const notifyTo = process.env.RELAY_NOTIFY_TO || REPLY_TO;
-  await sendResend({
-    to: notifyTo,
-    subject: `[RELAY waitlist] ${email}${welcome.sent ? "" : " (welcome mail failed)"}`,
-    html: `<p>New waitlist signup: <strong>${email}</strong></p>
-           <p>Welcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}</p>`,
-    text: `New waitlist signup: ${email}\nWelcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}`,
-  }).catch((e) => console.error("[email] notify failed", e));
+  // Notify your real inbox (don't use the From address — it may not receive mail)
+  const notifyTo = process.env.RELAY_NOTIFY_TO || "tandonkartikey@gmail.com";
+  if (notifyTo && notifyTo !== email) {
+    await sendResend({
+      to: notifyTo,
+      subject: `[RELAY waitlist] ${email}${welcome.sent ? "" : " (welcome mail failed)"}`,
+      html: `<p>New waitlist signup: <strong>${email}</strong></p><p>Welcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}</p>`,
+      text: `New waitlist signup: ${email}\nWelcome email: ${welcome.sent ? "sent" : `failed — ${welcome.reason}`}`,
+    }).catch((e) => console.error("[email] notify failed", e));
+  }
 
   return json(200, {
     ok: true,

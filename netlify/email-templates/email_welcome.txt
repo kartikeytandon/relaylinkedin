@@ -4,13 +4,7 @@ Thanks for joining{{#email}} as {{email}}{{/email}}.
 
 We're building a Chrome extension that finds hiring posts, connects, checks acceptances, and follows up — no terminal, no tech setup.
 
-YOUR LAUNCH PERK IS LOCKED
-When RELAY launches, waitlist members choose one:
-
-  • 1 month free — full access trial when we ship
-  • 90% off — deep launch discount on paid plans
-
-This offer is tied to {{email}}. We'll email you again at launch with your invite.
+As a waitlist member, your early-access invite is saved for {{email}}. When we launch you can choose 1 month free or 90% off — we'll email details then.
 
 What RELAY does
   01  Find hiring posts
